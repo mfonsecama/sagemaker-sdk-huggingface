@@ -1,0 +1,3 @@
+[submodule "docker/aws_deep_learning_container"]
+	path = docker/aws_deep_learning_container
+	url = git@github.com:aws/deep-learning-containers.git
