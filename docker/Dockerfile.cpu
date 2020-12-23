@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-LABEL maintainer="Amazon AI"
+LABEL maintainer="Philipp Schmid"
 LABEL dlc_major_version="1"
 
 # Add arguments to achieve the version, python and url
@@ -97,7 +97,9 @@ RUN pip install --upgrade pip --trusted-host pypi.org --trusted-host files.pytho
  && ln -s /opt/conda/bin/pip /usr/local/bin/pip3 \
  && pip install --no-cache-dir -U \
     "awscli<2" \
-    fastai==1.0.59 \
+    numpy>=1.17.0 \
+    transformers==4.1.1 \
+    datasets==1.1.3 \
     scipy==1.2.2 \
     click \
     "cryptography>3.2" \
