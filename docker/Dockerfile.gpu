@@ -1,7 +1,7 @@
 # The tag for the base image is: 11.0-cudnn8-devel-ubuntu16.04
 FROM nvidia/cuda:11.0-cudnn8-devel-ubuntu16.04
 
-LABEL maintainer="Amazon AI"
+LABEL maintainer="Philipp Schmid"
 LABEL dlc_major_version="2"
 
 ARG PYTHON_VERSION=3.6.10
@@ -120,8 +120,8 @@ RUN conda install -c pytorch magma-cuda110==2.5.2 \
 WORKDIR /opt/pytorch
 
 # Copy workaround script for incorrect hostname
-COPY changehostname.c /
-COPY start_with_right_hostname.sh /usr/local/bin/start_with_right_hostname.sh
+COPY build_artifacts/changehostname.c /
+COPY build_artifacts/start_with_right_hostname.sh /usr/local/bin/start_with_right_hostname.sh
 
 WORKDIR /root
 
@@ -135,7 +135,9 @@ RUN pip install \
     "sagemaker>=2,<3" \
     sagemaker-experiments==0.* \
     --no-cache-dir "sagemaker-pytorch-training<3" \
-    --no-cache-dir fastai==1.0.59 \
+    "numpy>=1.17.0" \
+    "transformers==4.1.1" \
+    "datasets==1.1.3" \
     "awscli<2" \
     psutil \
     Pillow \
