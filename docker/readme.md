@@ -14,7 +14,13 @@ for inference
 - a cpu container based on AWS DLC Pytorch1.6
 - a test container just checking if the parameters are passed correctly
 
-## Container Image List
+### Outline
+
+- [Container Image List](#quick-start)
+- [Script Arguments](#script-args)
+- [Build and Push Container Example](#xample)
+
+# 🔮 <a name="container-list"></a>Container Image List
 
 | Framework | type      | device | base                                            | python-version | transformers-version | datasets-version | URL                                                                                      |
 | --------- | --------- | ------ | ----------------------------------------------- | -------------- | -------------------- | ---------------- | ---------------------------------------------------------------------------------------- |
@@ -23,19 +29,19 @@ for inference
 | 0.0.1     | inference | cpu    | aws dlc pytorch1.6.0-cpu-py36-ubuntu16.04       | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                          |
 | 0.0.1     | inference | gpu    | aws dlc pytorch1.6.0-gpu-py36-cu110-ubuntu16.04 | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                          |
 
-## Script Arguments
+# ⚙️ <a name="script-args"></a> Script Arguments
 
 You can pass mutliple named arguments to the script.
 
-```bash
---image # The container image type either training, inference | default training
---device # The container device either cpu, gpu or test | default cpu
---account_id # The account_id of the aws account/registry | default 558105141721
---profile # The aws profile which going to be used | default default for CI-Pipelines use ci
---transformers_version # The transformers version which should be used in the container | default 4.1.1
---datasets_version # The datasets version which should be used in the container | default 1.1.3
---version # The Container version | default 0.0.1
-```
+| parameter              | default      | description                                                        |
+| ---------------------- | ------------ | ------------------------------------------------------------------ |
+| --image_type           | training     | The container image type either training, inference                |
+| --device               | cpu          | The container device either cpu, gpu or test                       |
+| --account_id           | 558105141721 | The aws account_id of the aws account/registry                     |
+| --profile              | default      | The aws profile which going to be used. Pass `ci` for CI-Pipelines |
+| --transformers_version | 4.1.1        | The transformers version which will be installed in the container  |
+| --datasets_version     | 1.1.3        | The datasets version which will be installed in the container      |
+| --version              | 0.0.1        | The container version                                              |
 
 **usage**
 
@@ -43,7 +49,7 @@ You can pass mutliple named arguments to the script.
 ./build_push.sh --device gpu --type training  --version 1.0.0
 ```
 
-## Build and Push Container
+# 🏗 <a name="example"></a> Build and Push Container Example
 
 **GPU Container Training**
 

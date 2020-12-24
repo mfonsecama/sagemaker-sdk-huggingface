@@ -5,8 +5,8 @@ transformers_version=4.1.1
 datasets_version=1.1.3
 
 # image variables
-image=training
-container_name=huggingface-$image
+image_type=training
+container_name=huggingface-$image_type
 device=cpu
                       
 # container versions/tags
@@ -26,7 +26,7 @@ ecr_alias=t6m7g5n4
 # parsing named arguments
 while (( $# > 1 )); do case $1 in
    --device) device="$2";;
-   --image) image="$2";;
+   --image_type) image_type="$2";;
    --account_id) aws_account_id="$2";;
    --profile) aws_profile="$2";;
    --transformers_version) transformers_version="$2";;
@@ -94,7 +94,7 @@ docker build --tag $ecr_url/$ecr_alias/$container_name:$tag \
                 --file $dockerfile \
                 --build-arg TRANSFORMERS_VERSION=$transformers_version \
                 --build-arg  DATASETS_VERSION=$datasets_version \
-                $image/. 
+                $image_type/. 
 
 # login into public ecr registry
 echo "login into ecr-public registry using ${aws_profile} profile"
