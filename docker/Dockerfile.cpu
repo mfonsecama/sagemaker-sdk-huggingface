@@ -7,6 +7,12 @@ LABEL dlc_major_version="1"
 ARG PYTHON_VERSION=3.6.10
 ARG OPEN_MPI_VERSION=4.0.1
 
+########### Custom ###########
+# Add Arguments for huggingface libary versions
+ARG TRANSFORMERS_VERSION=4.1.1
+ARG DATASETS_VERSION=1.1.3
+
+
 # The smdebug pipeline relies for following format to perform string replace and trigger DLC pipeline for validating
 # the nightly builds. Therefore, while updating the smdebug version, please ensure that the format is not disturbed.
 ARG SMDEBUG_VERSION=0.9.3
@@ -98,8 +104,8 @@ RUN pip install --upgrade pip --trusted-host pypi.org --trusted-host files.pytho
  && pip install --no-cache-dir -U \
     "awscli<2" \
     "numpy>=1.17.0" \
-    "transformers==4.1.1" \
-    "datasets==1.1.3" \
+    "transformers==${TRANSFORMERS_VERSION}" \
+    "datasets==${DATASETS_VERSION}" \
     scipy==1.2.2 \
     click \
     "cryptography>3.2" \
