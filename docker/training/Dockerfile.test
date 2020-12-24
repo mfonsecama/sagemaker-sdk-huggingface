@@ -1,0 +1,12 @@
+FROM ubuntu:16.04
+
+ARG TRANSFORMERS_VERSION
+ARG DATASETS_VERSION
+
+RUN echo "${TRANSFORMERS_VERSION}"
+RUN echo "${DATASETS_VERSION}"
+
+
+# Copy workaround script for incorrect hostname
+COPY build_artifacts/changehostname.c /
+COPY build_artifacts/start_with_right_hostname.sh /usr/local/bin/start_with_right_hostname.sh

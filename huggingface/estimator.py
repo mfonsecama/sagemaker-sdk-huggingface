@@ -1,4 +1,5 @@
 from sagemaker.estimator import Framework
+from sagemaker.pytorch.model import PyTorchModel
 import re
 
 
@@ -26,9 +27,13 @@ class HuggingFace(Framework):
     
     def upload_model_to_hub(self):
       return
-    
-    def hyperparameters(self):
+
+    def download_model(self):
       return
+    
+    # def hyperparameters(self):
+    # for distributed training
+    #   return
     
     def _get_container_image(self):
       """"""
@@ -68,4 +73,9 @@ class HuggingFace(Framework):
         image_name=None,
         **kwargs
     ):
-        return None
+        """returns Pytorch model from sagemaker-sdk since its none for HF implemented
+        https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/using_pytorch.html?highlight=requirements.txt#using-third-party-libraries
+        there fore we has to include a `requirements.txt` to the code folder
+        """
+        
+        return PyTorchModel()

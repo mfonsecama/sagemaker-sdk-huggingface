@@ -4,10 +4,11 @@
 transformers_version=4.1.1
 datasets_version=1.1.3
 
-# docker variables
-container_name=huggingface-training
-container_type=null
-
+# image variables
+image=training
+container_name=huggingface-$image
+device=cpu
+                      
 # container versions/tags
 version=0.0.1
 cpu_tag=$version-cpu-transformers$transformers_version-datasets$datasets_version
@@ -24,7 +25,8 @@ ecr_alias=t6m7g5n4
 
 # parsing named arguments
 while (( $# > 1 )); do case $1 in
-   --type) container_type="$2";;
+   --device) device="$2";;
+   --image) image="$2";;
    --account_id) aws_account_id="$2";;
    --profile) aws_profile="$2";;
    --transformers_version) transformers_version="$2";;
@@ -55,24 +57,24 @@ echo ""
 
 
 # checks if $aws_profile is available
-if [[ $aws_profile != 'ci']]; then
+if [[ $aws_profile != "ci" ]]; then
     profile_status=$( (aws configure --profile ${aws_profile} list ) 2>&1 )
     if [[ $profile_status = *'could not be found'* ]]; then 
         echo "" 
         echo "$(tput setaf 1)Failure: AWS proifle ${aws_profile} not found$(tput sgr0)" 
-        exit 1; 
+        exit 1
     fi
 fi
 # extracts container type  
-if [[ $container_type = "gpu" ]]; then
+if [[ $device = "gpu" ]]; then
     echo "Building gpu container...."
     tag=$gpu_tag
     dockerfile=Dockerfile.gpu
-elif [[ $container_type = "cpu" ]]; then
+elif [[ $device = "cpu" ]]; then
     echo "Building cpu container...."
     tag=$cpu_tag
     dockerfile=Dockerfile.cpu
-elif [[ $container_type = "test" ]]; then
+elif [[ $device = "test" ]]; then
     echo "Building test container...."
     dockerfile=Dockerfile.test
     docker build --tag $ecr_url/$ecr_alias/$container_name:test \
@@ -92,11 +94,11 @@ docker build --tag $ecr_url/$ecr_alias/$container_name:$tag \
                 --file $dockerfile \
                 --build-arg TRANSFORMERS_VERSION=$transformers_version \
                 --build-arg  DATASETS_VERSION=$datasets_version \
-                . 
+                $image/. 
 
 # login into public ecr registry
-echo "login into ecr-public registry using ${aws_profile}"
-if [[ $aws_profile = 'ci']]; then
+echo "login into ecr-public registry using ${aws_profile} profile"
+if [[ $aws_profile = 'ci' ]]; then
     aws ecr-public get-login-password \
         --region us-east-1 \
     | docker login \
