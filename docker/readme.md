@@ -1,21 +1,7 @@
-building cpu docker
+# Getting Started
 
-```bash
-docker build -t pytorch-sagemaker . -f Dockerfile.cpu
-```
+Here you can build the different HuggingFace Sagemaker container. You can build
 
-```bash
-    python src/main.py --buildspec pytorch/buildspec.yml \
-                      --framework pytorch \
-                      --image_types training \
-                      --device_types gpu \
-                      --py_versions py3
-```
-
-```bash
-    python aws_deep_learning_container/src/main.py --buildspec aws_deep_learning_container/pytorch/buildspec.yml \
-                      --framework pytorch \
-                      --image_types training \
-                      --device_types gpu \
-                      --py_versions py3
-```
+- a gpu container based on AWS DLC Pytorch1.6
+- a cpu container based on AWS DLC Pytorch1.6
+- a test container just checking if the parameters are passed correctly

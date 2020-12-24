@@ -57,8 +57,14 @@ elif [[ $container_type = "cpu" ]]; then
     dockerfile=Dockerfile.cpu
 elif [[ $container_type = "test" ]]; then
     echo "Building test container...."
-    tag=$cpu_tag
+    tag=$test_tag
     dockerfile=Dockerfile.test
+    docker build --tag $ecr_url/$ecr_alias/$container_name:$tag \
+                --file $dockerfile \
+                --build-arg TRANSFORMERS_VERSION=$transformers_version \
+                --build-arg  DATASETS_VERSION=$datasets_version \
+                . 
+    exit 1
 else
     echo "Pass --type cpu or --type gpu to build a container, for testing pass --type test"
     exit 1
