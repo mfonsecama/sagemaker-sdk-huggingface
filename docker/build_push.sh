@@ -15,7 +15,7 @@ gpu_tag=$version-gpu-transformers$transformers_version-datasets$datasets_version
 
 # aws parameters
 aws_account_id=558105141721
-aws_profile=hf-sm
+aws_profile=default
 
 #registry parameters
 ecr_url=public.ecr.aws
@@ -26,12 +26,15 @@ ecr_alias=t6m7g5n4
 while (( $# > 1 )); do case $1 in
    --type) container_type="$2";;
    --account_id) aws_account_id="$2";;
+   --profile) aws_profile="$2";;
    --transformers_version) transformers_version="$2";;
    --datasets_version) datasets_version="$2";;
    --version) version="$2";;
    *) break;
  esac; shift 2
 done
+
+
 
 # can be run only once! public repositories has to be created in us-east-1
 # aws ecr-public create-repository --repository-name $container_name  --profile $aws_profile --region us-east-1   > /dev/null
@@ -40,12 +43,27 @@ done
 echo "####################### Build and Push HuggingFace Sagemaker Container #######################"
 echo ""
 echo "Build parameters:"
-echo "container_type=$container_type"
-echo "aws_account_id=$aws_account_id"
-echo "transformers_version=$transformers_version"
-echo "datasets_version=$datasets_version"
-echo "container_version=$version"
+echo ""
 
+echo "      type=$(tput setaf 2)${container_type}$(tput sgr0)"
+echo "      account_id=$(tput setaf 2)${aws_account_id}$(tput sgr0)"
+echo "      profile=$(tput setaf 2)${aws_profile}$(tput sgr0)"
+echo "      transformers_version=$(tput setaf 2)${transformers_version}$(tput sgr0)"
+echo "      datasets_version=$(tput setaf 2)${datasets_version}$(tput sgr0)"
+echo "      container_version=$(tput setaf 2)${version}$(tput sgr0)"
+echo ""
+
+
+# checks if $aws_profile is available
+profile_status=$( (aws configure --profile ${aws_profile} list ) 2>&1 )
+if [[ $profile_status = *'could not be found'* ]]; then 
+    echo "" 
+    echo "$(tput setaf 1)Failure: AWS proifle ${aws_profile} not found$(tput sgr0)" 
+    exit 1; 
+fi
+
+
+# extracts container type  
 if [[ $container_type = "gpu" ]]; then
     echo "Building gpu container...."
     tag=$gpu_tag
@@ -64,7 +82,8 @@ elif [[ $container_type = "test" ]]; then
                 . 
     exit 1
 else
-    echo "Pass --type cpu or --type gpu to build a container, for testing pass --type test"
+    echo "" 
+    echo "$(tput setaf 1)Failure: Pass --type cpu or --type gpu to build a container, for testing pass --type test $(tput sgr0)" 
     exit 1
 fi
 
