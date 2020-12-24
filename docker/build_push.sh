@@ -25,7 +25,6 @@ ecr_alias=t6m7g5n4
 # parsing named arguments
 while (( $# > 1 )); do case $1 in
    --type) container_type="$2";;
-   --region) aws_region="$2";;
    --account_id) aws_account_id="$2";;
    --transformers_version) transformers_version="$2";;
    --datasets_version) datasets_version="$2";;
@@ -57,9 +56,8 @@ elif [[ $container_type = "cpu" ]]; then
     dockerfile=Dockerfile.cpu
 elif [[ $container_type = "test" ]]; then
     echo "Building test container...."
-    tag=$test_tag
     dockerfile=Dockerfile.test
-    docker build --tag $ecr_url/$ecr_alias/$container_name:$tag \
+    docker build --tag $ecr_url/$ecr_alias/$container_name:test \
                 --file $dockerfile \
                 --build-arg TRANSFORMERS_VERSION=$transformers_version \
                 --build-arg  DATASETS_VERSION=$datasets_version \
