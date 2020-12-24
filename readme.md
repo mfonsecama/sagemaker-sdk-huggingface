@@ -30,12 +30,12 @@ for inference
 
 # 🔮 <a name="container-list"></a>Container Image List
 
-| Framework | type      | device | base                                            | python-version | transformers-version | datasets-version | URL                                                                                      |
-| --------- | --------- | ------ | ----------------------------------------------- | -------------- | -------------------- | ---------------- | ---------------------------------------------------------------------------------------- |
-| 0.0.1     | training  | cpu    | aws dlc pytorch1.6.0-cpu-py36-ubuntu16.04       | 3.6.10         | 4.1.1                | 1.1.3            | `public.ecr.aws/t6m7g5n4/huggingface-training:0.0.1-cpu-transformers4.1.1-datasets1.1.3` |
-| 0.0.1     | training  | gpu    | aws dlc pytorch1.6.0-gpu-py36-cu110-ubuntu16.04 | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                          |
-| 0.0.1     | inference | cpu    | aws dlc pytorch1.6.0-cpu-py36-ubuntu16.04       | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                          |
-| 0.0.1     | inference | gpu    | aws dlc pytorch1.6.0-gpu-py36-cu110-ubuntu16.04 | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                          |
+| type      | device | base                                            | python-version | transformers-version | datasets-version | URL                                                                                      |
+| --------- | ------ | ----------------------------------------------- | -------------- | -------------------- | ---------------- | ---------------------------------------------------------------------------------------- |
+| training  | cpu    | aws dlc pytorch1.6.0-cpu-py36-ubuntu16.04       | 3.6.10         | 4.1.1                | 1.1.3            | `public.ecr.aws/t6m7g5n4/huggingface-training:0.0.1-cpu-transformers4.1.1-datasets1.1.3` |
+| training  | gpu    | aws dlc pytorch1.6.0-gpu-py36-cu110-ubuntu16.04 | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                          |
+| inference | cpu    | aws dlc pytorch1.6.0-cpu-py36-ubuntu16.04       | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                          |
+| inference | gpu    | aws dlc pytorch1.6.0-gpu-py36-cu110-ubuntu16.04 | 3.6.10         | 4.1.1                | 1.1.3            |
 
 # ⚙️ <a name="script-args"></a> Script Arguments
 
