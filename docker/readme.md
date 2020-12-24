@@ -13,7 +13,7 @@ You can pass mutliple named arguments to the script.
 ```bash
 --type # The container type either cpu, gpu or test | default cpu
 --account_id # The account_id of the aws account/registry | default 558105141721
---profile # The aws profile which going to be used | default default
+--profile # The aws profile which going to be used | default default for CI-Pipelines use ci
 --transformers_version # The transformers version which should be used in the container | default 4.1.1
 --datasets_version # The datasets version which should be used in the container | default 1.1.3
 --version # The Container version | default 0.0.1

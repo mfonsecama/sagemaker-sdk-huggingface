@@ -55,14 +55,14 @@ echo ""
 
 
 # checks if $aws_profile is available
-profile_status=$( (aws configure --profile ${aws_profile} list ) 2>&1 )
-if [[ $profile_status = *'could not be found'* ]]; then 
-    echo "" 
-    echo "$(tput setaf 1)Failure: AWS proifle ${aws_profile} not found$(tput sgr0)" 
-    exit 1; 
+if [[ $aws_profile != 'ci']]; then
+    profile_status=$( (aws configure --profile ${aws_profile} list ) 2>&1 )
+    if [[ $profile_status = *'could not be found'* ]]; then 
+        echo "" 
+        echo "$(tput setaf 1)Failure: AWS proifle ${aws_profile} not found$(tput sgr0)" 
+        exit 1; 
+    fi
 fi
-
-
 # extracts container type  
 if [[ $container_type = "gpu" ]]; then
     echo "Building gpu container...."
@@ -95,13 +95,21 @@ docker build --tag $ecr_url/$ecr_alias/$container_name:$tag \
                 . 
 
 # login into public ecr registry
-echo "login into ecr-public registry"
-aws ecr-public get-login-password \
-    --region us-east-1 \
-    --profile $aws_profile \
-| docker login \
-    --username AWS \
-    --password-stdin $ecr_url/$ecr_alias
+echo "login into ecr-public registry using ${aws_profile}"
+if [[ $aws_profile = 'ci']]; then
+    aws ecr-public get-login-password \
+        --region us-east-1 \
+    | docker login \
+        --username AWS \
+        --password-stdin $ecr_url/$ecr_alias
+else
+    aws ecr-public get-login-password \
+        --region us-east-1 \
+        --profile $aws_profile \
+    | docker login \
+        --username AWS \
+        --password-stdin $ecr_url/$ecr_alias
+fi
 
 # push docker to registry
 echo "pushing build docker image"
