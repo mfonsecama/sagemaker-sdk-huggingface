@@ -54,23 +54,23 @@ You can pass mutliple named arguments to the script.
 **GPU Container Training**
 
 ```bash
-./build_push.sh --device gpu --type training
+./build_push.sh --device gpu --image_type training
 ```
 
 **GPU Container Inference**
 
 ```bash
-./build_push.sh --device gpu --type inference
+./build_push.sh --device gpu --image_type inference
 ```
 
 **CPU Container Training**
 
 ```bash
-./build_push.sh --device cpu --type training
+./build_push.sh --device cpu --image_type training
 ```
 
 **CPU Container Inference**
 
 ```bash
-./build_push.sh --device cpu --type inference
+./build_push.sh --device cpu --image_type inference
 ```

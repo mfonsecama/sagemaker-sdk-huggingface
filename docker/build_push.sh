@@ -36,8 +36,6 @@ while (( $# > 1 )); do case $1 in
  esac; shift 2
 done
 
-
-
 # can be run only once! public repositories has to be created in us-east-1
 # aws ecr-public create-repository --repository-name $container_name  --profile $aws_profile --region us-east-1   > /dev/null
 
@@ -47,14 +45,14 @@ echo ""
 echo "Build parameters:"
 echo ""
 
-echo "      type=$(tput setaf 2)${container_type}$(tput sgr0)"
+echo "      image_type=$(tput setaf 2)${image_type}$(tput sgr0)"
+echo "      device=$(tput setaf 2)${device}$(tput sgr0)"
 echo "      account_id=$(tput setaf 2)${aws_account_id}$(tput sgr0)"
 echo "      profile=$(tput setaf 2)${aws_profile}$(tput sgr0)"
 echo "      transformers_version=$(tput setaf 2)${transformers_version}$(tput sgr0)"
 echo "      datasets_version=$(tput setaf 2)${datasets_version}$(tput sgr0)"
 echo "      container_version=$(tput setaf 2)${version}$(tput sgr0)"
 echo ""
-
 
 # checks if $aws_profile is available
 if [[ $aws_profile != "ci" ]]; then
@@ -78,10 +76,10 @@ elif [[ $device = "test" ]]; then
     echo "Building test container...."
     dockerfile=Dockerfile.test
     docker build --tag $ecr_url/$ecr_alias/$container_name:test \
-                --file $dockerfile \
+                --file ./$image_type/$dockerfile \
                 --build-arg TRANSFORMERS_VERSION=$transformers_version \
                 --build-arg  DATASETS_VERSION=$datasets_version \
-                . 
+                 ./$image_type 
     exit 1
 else
     echo "" 
@@ -91,10 +89,10 @@ fi
 
 # build docker container
 docker build --tag $ecr_url/$ecr_alias/$container_name:$tag \
-                --file $dockerfile \
+                --file ./$image_type/$dockerfile \
                 --build-arg TRANSFORMERS_VERSION=$transformers_version \
                 --build-arg  DATASETS_VERSION=$datasets_version \
-                $image_type/. 
+                ./$image_type 
 
 # login into public ecr registry
 echo "login into ecr-public registry using ${aws_profile} profile"

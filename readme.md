@@ -54,7 +54,7 @@ You can pass mutliple named arguments to the script.
 **usage**
 
 ```bash
-./build_push.sh --device gpu --type training  --version 1.0.0
+./docker/build_push.sh --device gpu --type training  --version 1.0.0
 ```
 
 # 🏗 <a name="example"></a> Build and Push Container Example
@@ -62,23 +62,23 @@ You can pass mutliple named arguments to the script.
 **GPU Container Training**
 
 ```bash
-./build_push.sh --device gpu --type training
+cd docker && ./build_push.sh --device gpu --image_type training --profile hf-sm
 ```
 
 **GPU Container Inference**
 
 ```bash
-./build_push.sh --device gpu --type inference
+./docker/build_push.sh --device gpu --image_type inference
 ```
 
 **CPU Container Training**
 
 ```bash
-./build_push.sh --device cpu --type training
+./docker/build_push.sh --device cpu --image_type training
 ```
 
 **CPU Container Inference**
 
 ```bash
-./build_push.sh --device cpu --type inference
+./docker/build_push.sh --device cpu --image_type inference
 ```
