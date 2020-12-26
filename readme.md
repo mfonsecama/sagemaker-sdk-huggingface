@@ -4,6 +4,8 @@ https://github.com/aws/amazon-sagemaker-examples/blob/master/advanced_functional
 
 https://sagemaker.readthedocs.io/en/stable/api/training/estimators.html#sagemaker.estimator.Framework
 
+[pytorch inference example](https://github.com/aws/amazon-sagemaker-examples/tree/master/frameworks/pytorch/code)
+
 ---
 
 # HugginFace Deep Learning Container

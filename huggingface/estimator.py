@@ -8,8 +8,7 @@ from sagemaker.s3.S3Downloader import (
     download as download_from_s3,
     read_file as read_file_from_s3,
 )
-from utils import validate_version_or_image_args
-import re
+from utils import validate_version_or_image_args, get_container_device
 
 
 class HuggingFace(Framework):
@@ -30,6 +29,7 @@ class HuggingFace(Framework):
     ):
         self.framework_version = framework_version
         self.py_version = py_version
+        self.sagemaker_session = sagemaker_session
 
         validate_version_or_image_args(self.framework_version, self.py_version)
 
@@ -68,8 +68,8 @@ class HuggingFace(Framework):
     def upload_model_to_hub(self):
         return
 
-    def download_model(self):
-        download_from_s3(self.model_data)
+    def download_model(self, local_path="."):
+        download_from_s3(s3_uri=self.model_data, local_path=local_path, sagemaker_session=self.sagemaker_session)
 
     # def hyperparameters(self):
     # for distributed training
@@ -77,35 +77,13 @@ class HuggingFace(Framework):
 
     def _get_container_image(self, container_type):
         """return container image ecr url"""
-        device = self._get_image_typ()
+        device = get_image_typ(self.instance_type)
         return _ecr_template_string.format(
             device=device,
             transformers_version=self.framework_version["transformers"],
             datasets_version=self.framework_version["datasets"],
             type=container_type,
         )
-
-    def _get_container_device(self):
-        """identifies container device """
-        if self.instance_type.startswith("local"):
-            device = "cpu" if self.instance_type == "local" else "gpu"
-        elif re.match(r"^ml[\._]([a-z\d]+)\.?\w*$", self.instance_type):
-            # looks for either "ml.<family>.<size>" or "ml_<family>"
-            match = re.match(r"^ml[\._]([a-z\d]+)\.?\w*$", self.instance_type)
-            family = match[1]
-            # 'cpu' or 'gpu'.
-            if family.startswith("inf"):
-                processor = "inf"
-            elif family[0] in ("g", "p"):
-                processor = "gpu"
-            else:
-                processor = "cpu"
-        else:
-            raise ValueError(
-                "Invalid SageMaker instance type: {}. For options, see: "
-                "https://aws.amazon.com/sagemaker/pricing/instance-types".format(self.instance_type)
-            )
-        return device
 
     def create_model(
         self,
