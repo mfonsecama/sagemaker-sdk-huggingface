@@ -8,17 +8,19 @@ from sagemaker.s3 import S3Downloader
 
 from huggingface.utils import validate_version_or_image_args, get_container_device
 from sagemaker import Session
+import tarfile
 
 
 class HuggingFace(Framework):
     """Custom sagemaker-sdk estimator impelemntation of the HuggingFace libaries."""
 
-    _public_ecr_template_string = "public.ecr.aws/t6m7g5n4/huggingface-{type}:0.0.1-{device}-transformers{transformers_version}-datasets{datasets_version}"
+    # FIXME: Sagemaker currently only supports images from private ecr not public ecr
+    # _public_ecr_template_string = "public.ecr.aws/t6m7g5n4/huggingface-{type}:0.0.1-{device}-transformers{transformers_version}-datasets{datasets_version}"
     _ecr_template_string = "558105141721.dkr.ecr.eu-central-1.amazonaws.com/huggingface-{type}:0.0.1-{device}-transformers{transformers_version}-datasets{datasets_version}"
 
     def __init__(
         self,
-        entry_point,
+        entry_point="train.py",
         source_dir=None,
         hyperparameters=None,
         py_version="py3",
@@ -27,19 +29,23 @@ class HuggingFace(Framework):
         distributions=None,
         **kwargs
     ):
-        self.instance_type = kwargs["instance_type"]
-
-        if "sagemaker_session" in kwargs:
-            self.sagemaker_session = kwargs["sagemaker_session"]
-        else:
-            self.sagemaker_session = Session()
 
         self.framework_version = framework_version
         self.py_version = py_version
 
         validate_version_or_image_args(self.framework_version, self.py_version)
 
+        if "instance_type" in kwargs:
+            self.instance_type = kwargs["instance_type"]
+        else:
+            self.instance_type = "local"
+
         self.image_uri = self._get_container_image("training")
+
+        if "sagemaker_session" in kwargs:
+            self.sagemaker_session = kwargs["sagemaker_session"]
+        else:
+            self.sagemaker_session = Session()
 
         #  for distributed training
         #     if distribution is not None:
@@ -72,8 +78,14 @@ class HuggingFace(Framework):
     def upload_model_to_hub(self):
         return
 
-    def download_model(self, local_path="."):
-        S3Downloader.download(s3_uri=self.model_data, local_path=local_path, sagemaker_session=self.sagemaker_session)
+    def download_model(self, local_path=".", unzip=False):
+        return download_model(
+            model_data=self.model_data,
+            local_path=local_path,
+            sagemaker_session=self.sagemaker_session,
+            model_dir=self.latest_training_job.name,
+            unzip=unzip,
+        )
 
     # def hyperparameters(self):
     # for distributed training
@@ -104,24 +116,26 @@ class HuggingFace(Framework):
         https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/using_pytorch.html?highlight=requirements.txt#using-third-party-libraries
         there fore we has to include a `requirements.txt` to the code folder
         """
-        if "image_uri" not in kwargs:
-            kwargs["image_uri"] = self._get_container_image("inference")
+        # TODO: Not implemented
+        return None
+        # if "image_uri" not in kwargs:
+        #     kwargs["image_uri"] = self._get_container_image("inference")
 
-        kwargs["name"] = self._get_or_create_name(kwargs.get("name"))
+        # kwargs["name"] = self._get_or_create_name(kwargs.get("name"))
 
-        return PyTorchModel(
-            self.model_data,
-            role or self.role,
-            entry_point or self._model_entry_point(),
-            framework_version="1.6",
-            py_version=self.py_version,
-            source_dir=(source_dir or self._model_source_dir()),
-            container_log_level=self.container_log_level,
-            code_location=self.code_location,
-            model_server_workers=model_server_workers,
-            sagemaker_session=self.sagemaker_session,
-            vpc_config=self.get_vpc_config(vpc_config_override),
-            dependencies=(dependencies or self.dependencies),
-            **kwargs
-        )
+        # return PyTorchModel(
+        #     self.model_data,
+        #     role or self.role,
+        #     entry_point or self._model_entry_point(),
+        #     framework_version="1.6",
+        #     py_version=self.py_version,
+        #     source_dir=(source_dir or self._model_source_dir()),
+        #     container_log_level=self.container_log_level,
+        #     code_location=self.code_location,
+        #     model_server_workers=model_server_workers,
+        #     sagemaker_session=self.sagemaker_session,
+        #     vpc_config=self.get_vpc_config(vpc_config_override),
+        #     dependencies=(dependencies or self.dependencies),
+        #     **kwargs
+        # )
 
