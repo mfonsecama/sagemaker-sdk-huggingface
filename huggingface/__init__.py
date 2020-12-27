@@ -4,4 +4,5 @@ from __future__ import absolute_import
 from estimator import HuggingFace
 from sagemaker.pytorch.model import PyTorchModel as HuggingFaceModel  # noqa: F401
 
-import datasets
+# from datasets import *
+# import transformers

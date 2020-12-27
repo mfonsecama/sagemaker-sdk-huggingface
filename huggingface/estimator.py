@@ -4,11 +4,9 @@ logger = logging.getLogger("sagemaker")
 
 from sagemaker.estimator import Framework
 from sagemaker.pytorch.model import PyTorchModel
-from sagemaker.s3.S3Downloader import (
-    download as download_from_s3,
-    read_file as read_file_from_s3,
-)
-from utils import validate_version_or_image_args, get_container_device
+from sagemaker.s3 import S3Downloader
+from huggingface.utils import validate_version_or_image_args, get_container_device
+from sagemaker import Session
 
 
 class HuggingFace(Framework):
@@ -27,9 +25,14 @@ class HuggingFace(Framework):
         distributions=None,
         **kwargs
     ):
+
+        if "sagemaker_session" in kwargs:
+            self.sagemaker_session = kwargs["sagemaker_session"]
+        else:
+            self.sagemaker_session = Session()
+
         self.framework_version = framework_version
         self.py_version = py_version
-        self.sagemaker_session = sagemaker_session
 
         validate_version_or_image_args(self.framework_version, self.py_version)
 
@@ -69,7 +72,7 @@ class HuggingFace(Framework):
         return
 
     def download_model(self, local_path="."):
-        download_from_s3(s3_uri=self.model_data, local_path=local_path, sagemaker_session=self.sagemaker_session)
+        S3Downloader.download(s3_uri=self.model_data, local_path=local_path, sagemaker_session=self.sagemaker_session)
 
     # def hyperparameters(self):
     # for distributed training

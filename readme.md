@@ -84,3 +84,7 @@ cd docker && ./build_push.sh --device gpu --image_type training --profile hf-sm
 ```bash
 ./docker/build_push.sh --device cpu --image_type inference
 ```
+
+# Troubleshoot
+
+- If you get an `UnknownServiceError` with `Unknown service: 'sagemaker-featurestore-runtime'` run `pip install -r requirements.txt --upgrade` and restart your jupyter runtime.

@@ -1,0 +1,8 @@
+sagemaker
+torch==1.6.0
+transformers
+datasets
+sklearn
+boto3
+numpy>=1.17.0
+sagemaker[local]
