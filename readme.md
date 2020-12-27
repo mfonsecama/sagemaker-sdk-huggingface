@@ -56,33 +56,35 @@ You can pass mutliple named arguments to the script.
 **usage**
 
 ```bash
-./docker/build_push.sh --device gpu --type training  --version 1.0.0
+./docker/build_push_private_ecr.sh --device gpu --type training  --version 1.0.0
 ```
 
 # 🏗 <a name="example"></a> Build and Push Container Example
 
+Since public.ecr is not supported by sagemaker currently you have to build the docker image for yourself and upload it to your private ecr registry.
+
 **GPU Container Training**
 
 ```bash
-cd docker && ./build_push.sh --device gpu --image_type training --profile hf-sm
+cd docker && ./build_push_private_ecr.sh --device gpu --image_type training --profile hf-sm
 ```
 
 **GPU Container Inference**
 
 ```bash
-./docker/build_push.sh --device gpu --image_type inference
+./docker/build_push_private_ecr.sh --device gpu --image_type inference
 ```
 
 **CPU Container Training**
 
 ```bash
-./docker/build_push.sh --device cpu --image_type training
+./docker/build_push_private_ecr.sh --device cpu --image_type training
 ```
 
 **CPU Container Inference**
 
 ```bash
-./docker/build_push.sh --device cpu --image_type inference
+./docker/build_push_private_ecr.sh --device cpu --image_type inference
 ```
 
 # Troubleshoot

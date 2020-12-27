@@ -5,6 +5,7 @@ logger = logging.getLogger("sagemaker")
 from sagemaker.estimator import Framework
 from sagemaker.pytorch.model import PyTorchModel
 from sagemaker.s3 import S3Downloader
+
 from huggingface.utils import validate_version_or_image_args, get_container_device
 from sagemaker import Session
 
@@ -12,7 +13,8 @@ from sagemaker import Session
 class HuggingFace(Framework):
     """Custom sagemaker-sdk estimator impelemntation of the HuggingFace libaries."""
 
-    _ecr_template_string = "public.ecr.aws/t6m7g5n4/huggingface-{type}:0.0.1-{device}-transformers{transformers_version}-datasets{datasets_version}"
+    _public_ecr_template_string = "public.ecr.aws/t6m7g5n4/huggingface-{type}:0.0.1-{device}-transformers{transformers_version}-datasets{datasets_version}"
+    _ecr_template_string = "558105141721.dkr.ecr.eu-central-1.amazonaws.com/huggingface-{type}:0.0.1-{device}-transformers{transformers_version}-datasets{datasets_version}"
 
     def __init__(
         self,
@@ -25,6 +27,7 @@ class HuggingFace(Framework):
         distributions=None,
         **kwargs
     ):
+        self.instance_type = kwargs["instance_type"]
 
         if "sagemaker_session" in kwargs:
             self.sagemaker_session = kwargs["sagemaker_session"]
@@ -36,7 +39,7 @@ class HuggingFace(Framework):
 
         validate_version_or_image_args(self.framework_version, self.py_version)
 
-        self.image_name = self._get_container_image("training")
+        self.image_uri = self._get_container_image("training")
 
         #  for distributed training
         #     if distribution is not None:
@@ -62,9 +65,7 @@ class HuggingFace(Framework):
         #     if self.framework_version and Version(self.framework_version) >= Version("1.3"):
         #         kwargs["enable_sagemaker_metrics"] = True
 
-        super(CustomFramework, self).__init__(
-            entry_point, source_dir, hyperparameters, image_name=self.image_name, **kwargs
-        )
+        super(HuggingFace, self).__init__(entry_point, source_dir, hyperparameters, image_uri=self.image_uri, **kwargs)
 
         # self.distribution = distribution or {}
 
@@ -80,8 +81,8 @@ class HuggingFace(Framework):
 
     def _get_container_image(self, container_type):
         """return container image ecr url"""
-        device = get_image_typ(self.instance_type)
-        return _ecr_template_string.format(
+        device = get_container_device(self.instance_type)
+        return self._ecr_template_string.format(
             device=device,
             transformers_version=self.framework_version["transformers"],
             datasets_version=self.framework_version["datasets"],
@@ -123,3 +124,4 @@ class HuggingFace(Framework):
             dependencies=(dependencies or self.dependencies),
             **kwargs
         )
+

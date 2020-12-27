@@ -12,10 +12,10 @@ def validate_version_or_image_args(framework_version, py_version):
     """
     if (
         framework_version is None
-        or py_version != "3"
+        or py_version != "py3"
         or "transformers" not in framework_version
         or "datasets" not in framework_version
-    ) and image_uri is None:
+    ):
         raise ValueError(
             "framework_version or py_version was None, "
             "Either specify both framework_version and py_version, or specify image_uri."
@@ -43,4 +43,3 @@ def get_container_device(instance_type):
             "https://aws.amazon.com/sagemaker/pricing/instance-types".format(instance_type)
         )
     return device
-
