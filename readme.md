@@ -14,7 +14,7 @@ This Repository contains multiple examples "how to use the transformers and data
 
 ---
 
-# HugginFace Deep Learning Container
+# 🧱 HugginFace Deep Learning Container
 
 You can build different HuggingFace Deep Learning Container to use them in AWS Sagemaker.
 
@@ -41,7 +41,7 @@ _**NOTE:** Sadly Sagemaker doesn´t support `public.ecr.aws` images so therefore
 | inference | cpu    | aws dlc pytorch1.6.0-cpu-py36-ubuntu16.04       | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                                |
 | inference | gpu    | aws dlc pytorch1.6.0-gpu-py36-cu110-ubuntu16.04 | 3.6.10         | 4.1.1                | 1.1.3            |
 
-# ⚙️ <a name="script-args"></a> Script Arguments
+## ⚙️ <a name="script-args"></a> Script Arguments
 
 You can pass mutliple named arguments to the script.
 
