@@ -6,11 +6,19 @@ https://sagemaker.readthedocs.io/en/stable/api/training/estimators.html#sagemake
 
 [pytorch inference example](https://github.com/aws/amazon-sagemaker-examples/tree/master/frameworks/pytorch/code)
 
+# Outline
+
+- [Container Image List](#container-list)
+- [Script Arguments](#script-args)
+- [Build and Push Container Example](#example)
+- [How to use HuggingFace sagemaker-sdk extension](#sdk)
+- [Example Overview](#exov)
+
 ---
 
 # HugginFace Deep Learning Container
 
-Here you can build the different HuggingFace Sagemaker container. You can build
+You can build different HuggingFace Deep Learning Container to use them in AWS Sagemaker.
 
 for training
 
@@ -24,19 +32,15 @@ for inference
 - a cpu container based on AWS DLC Pytorch1.6
 - a test container just checking if the parameters are passed correctly
 
-### Outline
+## 🔮 <a name="container-list"></a>Container Image List
 
-- [Container Image List](#quick-start)
-- [Script Arguments](#script-args)
-- [Build and Push Container Example](#xample)
+_**NOTE:** Sadly Sagemaker doesn´t support `public.ecr.aws` images so therefore, we have to used container in `private` registry. To use a private registry you can use the `docker/build_push_private_ecr.sh` script to build and push the container to your private ecr registry._
 
-# 🔮 <a name="container-list"></a>Container Image List
-
-| type      | device | base                                            | python-version | transformers-version | datasets-version | URL                                                                                      |
-| --------- | ------ | ----------------------------------------------- | -------------- | -------------------- | ---------------- | ---------------------------------------------------------------------------------------- |
-| training  | cpu    | aws dlc pytorch1.6.0-cpu-py36-ubuntu16.04       | 3.6.10         | 4.1.1                | 1.1.3            | `public.ecr.aws/t6m7g5n4/huggingface-training:0.0.1-cpu-transformers4.1.1-datasets1.1.3` |
-| training  | gpu    | aws dlc pytorch1.6.0-gpu-py36-cu110-ubuntu16.04 | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                          |
-| inference | cpu    | aws dlc pytorch1.6.0-cpu-py36-ubuntu16.04       | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                          |
+| type      | device | base                                            | python-version | transformers-version | datasets-version | public-URL                                                                                     |
+| --------- | ------ | ----------------------------------------------- | -------------- | -------------------- | ---------------- | ---------------------------------------------------------------------------------------------- |
+| training  | cpu    | aws dlc pytorch1.6.0-cpu-py36-ubuntu16.04       | 3.6.10         | 4.1.1                | 1.1.3            | `public.ecr.aws/t6m7g5n4/huggingface-training:0.0.1-cpu-transformers4.1.1-datasets1.1.3`       |
+| training  | gpu    | aws dlc pytorch1.6.0-gpu-py36-cu110-ubuntu16.04 | 3.6.10         | 4.1.1                | 1.1.3            | `public.ecr.aws/t6m7g5n4/huggingface-training:0.0.1-gpu-transformers4.1.1-datasets1.1.3-cu110` |
+| inference | cpu    | aws dlc pytorch1.6.0-cpu-py36-ubuntu16.04       | 3.6.10         | 4.1.1                | 1.1.3            |                                                                                                |
 | inference | gpu    | aws dlc pytorch1.6.0-gpu-py36-cu110-ubuntu16.04 | 3.6.10         | 4.1.1                | 1.1.3            |
 
 # ⚙️ <a name="script-args"></a> Script Arguments
@@ -59,7 +63,7 @@ You can pass mutliple named arguments to the script.
 ./docker/build_push_private_ecr.sh --device gpu --type training  --version 1.0.0
 ```
 
-# 🏗 <a name="example"></a> Build and Push Container Example
+## 🏗 <a name="example"></a> Build and Push Container Example
 
 Since public.ecr is not supported by sagemaker currently you have to build the docker image for yourself and upload it to your private ecr registry.
 
@@ -86,6 +90,43 @@ cd docker && ./build_push_private_ecr.sh --device gpu --image_type training --pr
 ```bash
 ./docker/build_push_private_ecr.sh --device cpu --image_type inference
 ```
+
+# 🧵 <a name="sdk"></a> How to use HuggingFace sagemaker-sdk extension
+
+This Repository contains multiple examples "how to use the transformers and datasets library from HuggingFace with AWS Sagemaker". All Notebooks can be run locally or within AWS Sagemaker Studio.
+
+**example strucute**
+
+Each folder starting with `0X_...` contains an sagemaker example.  
+Each example contains a jupyter notebook `sagemaker-example.ipynb`, which is used to start train job on AWS Sagemaker or preprocess data.
+
+As explained above, you are able to run these examples either on your local machine or in the AWS Sagemaker Studio.
+
+## <a name="exov"></a> Example Overview
+
+| example                                                                                                                                                                                            | description                                                                                                                                                                                                              |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [01_basic_example_huggingface_extension](https://github.com/philschmid/sagemaker-sdk-huggingface/blob/main/examples/01_basic_example_huggingface_extension/sagemaker-notebook.ipynb)               | This example uses the custom HuggingFace sagemaker extension. In the fine-tuning scripts, it uses the `Trainer` class. The dataset is processed in jupyter notebook with the `datasets` library and then uploaded to S3. |
+| [02_spot_instances_with_huggingface_extension](https://github.com/philschmid/sagemaker-sdk-huggingface/blob/main/examples/02_spot_instances_with_huggingface_extension/sagemaker-notebook.ipynb)   | It is the same example as `01_basic_example_huggingface_extension`, but we will use ec2 spot instances for training, which can reduce the training cost up to 90%                                                        |
+| [03_track_custom_metrics_huggingface_extension](https://github.com/philschmid/sagemaker-sdk-huggingface/blob/main/examples/03_track_custom_metrics_huggingface_extension/sagemaker-notebook.ipynb) | It is the same example as `02_spot_instances_with_huggingface_extension`, but we will use `custom_metrics` to track validation metrics in our training job and plot them into the notebook                               |
+
+## Getting started locally
+
+If you want to use an example on your local machine, you need:
+
+- an AWS Account
+- configured AWS credentials on your local machine,
+- an AWS Sagemaker IAM Role
+
+If you don´t have an AWS account you can create one [here](https://portal.aws.amazon.com/billing/signup?nc2=h_ct&src=header_signup&redirect_url=https%3A%2F%2Faws.amazon.com%2Fregistration-confirmation#/start). To configure AWS credentials on your local machine you can take a look [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html). Lastly, to create an AWS Sagemaker IAM Role you can take a look [here](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html), beaware if you change the name of the role, you have to adjust it in the jupyter notebook. Now you have to install dependencies from the `requirements.txt` and you are good to go.
+
+```bash
+pip install -r requirements.txt
+```
+
+## Getting started with Sagemaker Studio
+
+If you want to use an example in sagemaker studio. You can open your sagemaker studio and then clone the github repository. Afterwards you have to install dependencies from the `requirements.txt`.
 
 # Troubleshoot
 
