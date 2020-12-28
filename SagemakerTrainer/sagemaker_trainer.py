@@ -18,6 +18,10 @@ class SageMakerTrainer:
         """Gathers the correct training script for the given task"""
         pass
 
+    def _create_sme_experiments(self):
+        """creates an AWS Sagemaker experiment"""
+        pass
+
     def upload_data_to_s3(self):
         """uploads datasets files (arrow, json, etc.) to s3."""
         pass

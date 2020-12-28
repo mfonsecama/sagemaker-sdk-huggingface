@@ -7,3 +7,4 @@ boto3
 numpy>=1.17.0
 sagemaker[local]
 matplotlib
+sagemaker-experiments
