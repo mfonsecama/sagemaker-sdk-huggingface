@@ -6,7 +6,7 @@ from sagemaker.estimator import Framework
 from sagemaker.pytorch.model import PyTorchModel
 from sagemaker.s3 import S3Downloader
 
-from huggingface.utils import validate_version_or_image_args, get_container_device
+from huggingface.utils import validate_version_or_image_args, get_container_device, plot_result, download_model
 from sagemaker import Session
 import tarfile
 
@@ -27,21 +27,23 @@ class HuggingFace(Framework):
         framework_version={"transformers": "4.1.1", "datasets": "1.1.3"},
         image_name=None,
         distributions=None,
-        **kwargs
+        **kwargs,
     ):
-
+        # validating framework_version and python version
         self.framework_version = framework_version
         self.py_version = py_version
-
         validate_version_or_image_args(self.framework_version, self.py_version)
 
+        # checking for instance_type
         if "instance_type" in kwargs:
             self.instance_type = kwargs["instance_type"]
         else:
             self.instance_type = "local"
 
+        # build ecr_uri
         self.image_uri = self._get_container_image("training")
 
+        # using or create a sagemaker session
         if "sagemaker_session" in kwargs:
             self.sagemaker_session = kwargs["sagemaker_session"]
         else:
@@ -87,6 +89,9 @@ class HuggingFace(Framework):
             unzip=unzip,
         )
 
+    def plot_result(self, metrics="all"):
+        return plot_result(self, metrics)
+
     # def hyperparameters(self):
     # for distributed training
     #   return
@@ -94,12 +99,15 @@ class HuggingFace(Framework):
     def _get_container_image(self, container_type):
         """return container image ecr url"""
         device = get_container_device(self.instance_type)
-        return self._ecr_template_string.format(
+        image_uri = self._ecr_template_string.format(
             device=device,
             transformers_version=self.framework_version["transformers"],
             datasets_version=self.framework_version["datasets"],
             type=container_type,
         )
+        if device == "gpu":
+            image_uri = f"{image_uri}-cu110"
+        return image_uri
 
     def create_model(
         self,
@@ -110,7 +118,7 @@ class HuggingFace(Framework):
         source_dir=None,
         dependencies=None,
         image_name=None,
-        **kwargs
+        **kwargs,
     ):
         """returns Pytorch model from sagemaker-sdk since its none for HF implemented
         https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/using_pytorch.html?highlight=requirements.txt#using-third-party-libraries
