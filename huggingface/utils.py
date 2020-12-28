@@ -3,6 +3,9 @@ from sagemaker.s3 import S3Downloader
 import tarfile
 import os
 
+# import pandas as pd
+# import matplotlib
+
 
 def validate_version_or_image_args(framework_version, py_version):
     """Checks if libary or python version arguments are specified correct.
