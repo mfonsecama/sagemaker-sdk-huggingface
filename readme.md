@@ -1,12 +1,10 @@
-# sagemaker-sdk-huggingface
+# 🤗 sagemaker-sdk-huggingface
 
-https://github.com/aws/amazon-sagemaker-examples/blob/master/advanced_functionality/custom-training-containers/script-mode-container-2/notebook/script-mode-container-2.ipynb
+This repostiory implements a cutsom sagemaker-sdk extension for the HuggingFace libraries. The repostoriy is split into 3 parts. First there is `docker/`, which contains the `dockerfiles` and scripts to create the AWS DLC for HuggingFace. Second there is `hugginface/`, which includes the custom `HuggingFace()` extension for the sagemaker-sdk. Lastly there is another folder `examples/`, which contains multiple examples on how to use the `HuggingFace()` extension for sagemaker-sdk
 
-https://sagemaker.readthedocs.io/en/stable/api/training/estimators.html#sagemaker.estimator.Framework
+This Repository contains multiple examples "how to use the transformers and datasets library from HuggingFace with AWS Sagemaker". All Notebooks can be run locally or within AWS Sagemaker Studio.
 
-[pytorch inference example](https://github.com/aws/amazon-sagemaker-examples/tree/master/frameworks/pytorch/code)
-
-# Outline
+### Outline
 
 - [Container Image List](#container-list)
 - [Script Arguments](#script-args)
@@ -131,3 +129,10 @@ If you want to use an example in sagemaker studio. You can open your sagemaker s
 # Troubleshoot
 
 - If you get an `UnknownServiceError` with `Unknown service: 'sagemaker-featurestore-runtime'` run `pip install -r requirements.txt --upgrade` and restart your jupyter runtime.
+
+Links:
+https://github.com/aws/amazon-sagemaker-examples/blob/master/advanced_functionality/custom-training-containers/script-mode-container-2/notebook/script-mode-container-2.ipynb
+
+https://sagemaker.readthedocs.io/en/stable/api/training/estimators.html#sagemaker.estimator.Framework
+
+[pytorch inference example](https://github.com/aws/amazon-sagemaker-examples/tree/master/frameworks/pytorch/code)
