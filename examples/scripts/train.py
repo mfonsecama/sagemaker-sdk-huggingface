@@ -18,6 +18,7 @@ if __name__ == "__main__":
     parser.add_argument("--eval-batch-size", type=int, default=64)
     parser.add_argument("--warmup_steps", type=int, default=500)
     parser.add_argument("--model_name", type=str)
+    parser.add_argument("--learning_rate", type=str, default=5e-5)
 
     # Data, model, and output directories
     parser.add_argument("--output-data-dir", type=str, default=os.environ["SM_OUTPUT_DATA_DIR"])
@@ -64,6 +65,7 @@ if __name__ == "__main__":
         warmup_steps=args.warmup_steps,
         evaluation_strategy="epoch",
         logging_dir=f"{args.output_data_dir}/logs",
+        learning_rate=float(args.learning_rate),
     )
 
     # create Trainer instance
