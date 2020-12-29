@@ -54,3 +54,4 @@ class SageMakerTrainer:
     def plot_result(self):
         """plots result metrics as chart"""
         pass
+
