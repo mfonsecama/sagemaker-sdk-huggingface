@@ -9,6 +9,7 @@ from sagemaker.s3 import S3Downloader
 from huggingface.utils import validate_version_or_image_args, get_container_device, plot_result, download_model
 from sagemaker import Session
 import tarfile
+import os
 
 
 class HuggingFace(Framework):
@@ -81,6 +82,7 @@ class HuggingFace(Framework):
         return
 
     def download_model(self, local_path=".", unzip=False):
+        os.makedirs(local_path, exist_ok=True)
         return download_model(
             model_data=self.model_data,
             local_path=local_path,
@@ -88,6 +90,17 @@ class HuggingFace(Framework):
             model_dir=self.latest_training_job.name,
             unzip=unzip,
         )
+
+    def fit(self, inputs=None, wait=True, logs="All", job_name=None, experiment_config=None):
+        # if self.credentials:
+        #     HfApi().create_repo(
+        #     token=args.huggingface_token,
+        #     name=args.hub_repo_name
+        # )
+        print("Starting training")
+        super(HuggingFace, self).fit(inputs, wait, logs, job_name, experiment_config)
+        print("uploading model to hub")
+        self.download_model("model", True)
 
     def plot_result(self, metrics="all"):
         return plot_result(self, metrics)

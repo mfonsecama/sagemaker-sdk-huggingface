@@ -2,6 +2,7 @@ import sys
 import subprocess
 import json
 import os
+from typing import Dict, List
 
 MODEL_CARD_TEMPLATE = """
 ---
@@ -29,9 +30,9 @@ class HfRepository:
 
     def __init__(
         self,
-        repo_url,
-        huggingface_token,
-        model_dir=".",
+        repo_url: str,
+        huggingface_token: str,
+        model_dir: str,
         large_file_tracking_list=[],
         user="sagemaker",
         email="sagemaker@huggingface.co",
@@ -69,10 +70,19 @@ class HfRepository:
         subprocess.run(f"git config --global user.name {self.user}".split(), check=True)
 
     def clone_remote_repository_to_local_dir(self):
-        """clones repository from HuggingFace Hub into model directory"""
-        subprocess.run(f"git clone {self.repo_url} {self.model_dir}".split(), check=True)
+        """clones repository from HuggingFace Hub into model directory if directory exists init and add remote repo"""
+        # TODO: refactor exception handling to avoidtry:
+        #   try:
+        #     output = subprocess.check_output(['git', 'commit', '-m', 'commit model from SageMaker'])
+        #   except subprocess.CalledProcessError as e:
+        #       print(e.output.decode())
+        try:
+            subprocess.run(f"git clone {self.repo_url} {self.model_dir}".split(), check=True)
+        except:
+            subprocess.run(f"git init .".split(), check=True, cwd=self.model_dir)
+            subprocess.run(f"git remote add origin {self.repo_url}".split(), check=True, cwd=self.model_dir)
 
-    def add_token_to_repository_url(self, repo_url, huggingface_token):
+    def add_token_to_repository_url(self, repo_url: str, huggingface_token: str) -> str:
         """replaces default repository url and adds huggingface token to so git push is possible"""
         return repo_url.replace("https://", f"https://user:{huggingface_token}@")
 
@@ -81,18 +91,18 @@ class HfRepository:
         for file_ending in self.large_file_tracking_list:
             subprocess.run(f"git lfs track {file_ending}".split(), check=True, cwd=self.model_dir)
 
-    def create_model_card(self, dataset, model_id, hyperparameters, eval_results):
+    def create_model_card(self, dataset: str, model_id: str, hyperparameters: Dict, eval_results: List):
         """creates a model card from an existing template needs datasets, model_id, hyperparameters and eval_results"""
         model_card = MODEL_CARD_TEMPLATE.format(
             dataset=dataset,
             model_id=model_id,
-            hyperparameters=json.dumps(hyperparameters),
+            hyperparameters=hyperparameters,
             eval_table="\n".join(f"| {k} | {v} |" for k, v in eval_results.items()),
         )
         with open(os.path.join(self.model_dir, "README.md"), "w") as f:
             f.write(model_card)
 
-        self.commit_files_and_push_to_hub("added model card")
+        # self.commit_files_and_push_to_hub("added model card")
 
     def commit_files(self, commit_message="commit model from SageMaker"):
         """adds and commits files from current directory"""
@@ -101,7 +111,15 @@ class HfRepository:
 
     def push_to_hub(self):
         """pushes commited files to HuggingFace Hub"""
-        subprocess.run(f"git push".split(), check=True, cwd=self.model_dir)
+        # TODO: refactor exception handling to avoidtry:
+        #   try:
+        #     output = subprocess.check_output(['git', 'commit', '-m', 'commit model from SageMaker'])
+        #   except subprocess.CalledProcessError as e:
+        #       print(e.output.decode())
+        try:
+            subprocess.run(f"git push".split(), check=True, cwd=self.model_dir)
+        except:
+            subprocess.run(f"git push --set-upstream origin master".split(), check=True, cwd=self.model_dir)
 
     def commit_files_and_push_to_hub(self, commit_message="commit model from SageMaker"):
         """combines commit_files and push_to_hub"""
