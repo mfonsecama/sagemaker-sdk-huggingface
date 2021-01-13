@@ -1,6 +1,13 @@
 import logging
+import sys
 
 logger = logging.getLogger("sagemaker")
+
+logging.basicConfig(
+    level=logging.getLevelName("INFO"),
+    handlers=[logging.StreamHandler(sys.stdout)],
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 from sagemaker.estimator import Framework
 from sagemaker.pytorch.model import PyTorchModel
@@ -10,6 +17,10 @@ from huggingface.utils import validate_version_or_image_args, get_container_devi
 from sagemaker import Session
 import tarfile
 import os
+from typing import Dict, List, Optional
+
+from transformers.hf_api import HfApi
+from huggingface.HfRepository import HfRepository
 
 
 class HuggingFace(Framework):
@@ -22,14 +33,54 @@ class HuggingFace(Framework):
     def __init__(
         self,
         entry_point="train.py",
-        source_dir=None,
-        hyperparameters=None,
+        source_dir: str = None,
+        hyperparameters: Optional[Dict[str, str]] = None,
         py_version="py3",
         framework_version={"transformers": "4.1.1", "datasets": "1.1.3"},
-        image_name=None,
-        distributions=None,
+        image_uri: Optional[str] = None,
+        huggingface_token: str = None,
+        # distribution=None,
         **kwargs,
     ):
+        """
+        Args:
+            entry_point (str): Path (absolute or relative) to the Python source
+                file which should be executed as the entry point to training.
+                If ``source_dir`` is specified, then ``entry_point``
+                must point to a file located at the root of ``source_dir``.
+            source_dir (str): Path (absolute, relative or an S3 URI) to a directory
+                with any other training source code dependencies aside from the entry
+                point file (default: None). If ``source_dir`` is an S3 URI, it must
+                point to a tar.gz file. Structure within this directory are preserved
+                when training on Amazon SageMaker.
+            hyperparameters (dict): Hyperparameters that will be used for
+                training (default: None). The hyperparameters are made
+                accessible as a dict[str, str] to the training code on
+                SageMaker. For convenience, this accepts other types for keys
+                and values, but ``str()`` will be called to convert them before
+                training.
+            framework_version (str): PyTorch version you want to use for
+                executing your model training code. Defaults to ``None``. Required unless
+                ``image_uri`` is provided. List of supported versions:
+                https://github.com/aws/sagemaker-python-sdk#pytorch-sagemaker-estimators.
+            py_version (str): Python version you want to use for executing your
+                model training code. One of 'py2' or 'py3'. Defaults to ``None``. Required
+                unless ``image_uri`` is provided.
+            image_uri (str): If specified, the estimator will use this image
+                for training and hosting, instead of selecting the appropriate
+                SageMaker official image based on framework_version and
+                py_version. It can be an ECR url or dockerhub image and tag.
+                Examples:
+                    * ``123412341234.dkr.ecr.us-west-2.amazonaws.com/my-custom-image:1.0``
+                    * ``custom-image:latest``
+                If ``framework_version`` or ``py_version`` are ``None``, then
+                ``image_uri`` is required. If also ``None``, then a ``ValueError``
+                will be raised.
+            huggingface_token (str): HuggingFace Hub authentication token for uploading your model files. 
+                You can get this by either using the [transformers-cli](https://huggingface.co/transformers/model_sharing.html) with `transfomers-cli login`
+                or using the `login()` method of `transformers.hf_api`. If the HuggingFace Token is provided the model will uploaded automatically to the 
+                model hub using the `base_job_name` as repository name. 
+        """
         # validating framework_version and python version
         self.framework_version = framework_version
         self.py_version = py_version
@@ -50,36 +101,15 @@ class HuggingFace(Framework):
         else:
             self.sagemaker_session = Session()
 
-        #  for distributed training
-        #     if distribution is not None:
-        #     instance_type = renamed_kwargs(
-        #         "train_instance_type", "instance_type", kwargs.get("instance_type"), kwargs
-        #     )
-
-        #     validate_smdistributed(
-        #         instance_type=instance_type,
-        #         framework_name=self._framework_name,
-        #         framework_version=framework_version,
-        #         py_version=py_version,
-        #         distribution=distribution,
-        #         image_uri=image_uri,
-        #     )
-
-        #     warn_if_parameter_server_with_multi_gpu(
-        #         training_instance_type=instance_type, distribution=distribution
-        #     )
-
-        # if "enable_sagemaker_metrics" not in kwargs:
-        #     # enable sagemaker metrics for PT v1.3 or greater:
-        #     if self.framework_version and Version(self.framework_version) >= Version("1.3"):
-        #         kwargs["enable_sagemaker_metrics"] = True
-
         super(HuggingFace, self).__init__(entry_point, source_dir, hyperparameters, image_uri=self.image_uri, **kwargs)
 
-        # self.distribution = distribution or {}
+        if huggingface_token:
+            logger.info(
+                f"estimator initialized with HuggingFace Token, model will be uploaded to hub using the {self.base_job_name} as repostiory name"
+            )
+            self.huggingface_token = huggingface_token
 
-    def upload_model_to_hub(self):
-        return
+        # self.distribution = distribution or {}
 
     def download_model(self, local_path=".", unzip=False):
         os.makedirs(local_path, exist_ok=True)
@@ -92,15 +122,26 @@ class HuggingFace(Framework):
         )
 
     def fit(self, inputs=None, wait=True, logs="All", job_name=None, experiment_config=None):
-        # if self.credentials:
-        #     HfApi().create_repo(
-        #     token=args.huggingface_token,
-        #     name=args.hub_repo_name
-        # )
-        print("Starting training")
+        if self.huggingface_token and wait == True:
+            logger.info(f"creating repository {self.base_job_name} on the HF hub")
+            self.repo_url = HfApi().create_repo(token=self.huggingface_token, name=self.base_job_name)
+
+        # parent fit method
         super(HuggingFace, self).fit(inputs, wait, logs, job_name, experiment_config)
-        print("uploading model to hub")
-        self.download_model("model", True)
+
+        if self.huggingface_token and wait == True:
+            logger.info(f"downloading model to {self.latest_training_job.name}/ ")
+            self.download_model(".", True)
+
+            logger.info(f"initalizing model repository ")
+            model_repo = HfRepository(
+                repo_url=self.repo_url,
+                huggingface_token=self.huggingface_token,
+                model_dir=f"./{self.latest_training_job.name}",
+            )
+
+            logger.info("uploading model files to HF hub")
+            model_repo.commit_files_and_push_to_hub()
 
     def plot_result(self, metrics="all"):
         return plot_result(self, metrics)
