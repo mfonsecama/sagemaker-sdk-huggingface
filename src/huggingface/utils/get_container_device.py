@@ -1,8 +1,4 @@
-import os
 import re
-import tarfile
-
-from sagemaker.s3 import S3Downloader
 
 
 def get_container_device(instance_type):

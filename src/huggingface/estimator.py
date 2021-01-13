@@ -1,23 +1,11 @@
 import logging
-import sys
 import os
-import tarfile
+import sys
 
-logger = logging.getLogger("sagemaker")
-
-logging.basicConfig(
-    level=logging.getLevelName("INFO"),
-    handlers=[logging.StreamHandler(sys.stdout)],
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-
-
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from sagemaker import Session
 from sagemaker.estimator import Framework
-from sagemaker.pytorch.model import PyTorchModel
-from sagemaker.s3 import S3Downloader
 from transformers.hf_api import HfApi
 
 from huggingface.utils import (
@@ -26,6 +14,14 @@ from huggingface.utils import (
     get_container_device,
     plot_results,
     validate_version_or_image_args,
+)
+
+logger = logging.getLogger("sagemaker")
+
+logging.basicConfig(
+    level=logging.getLevelName("INFO"),
+    handlers=[logging.StreamHandler(sys.stdout)],
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
 
@@ -125,14 +121,14 @@ class HuggingFace(Framework):
         )
 
     def fit(self, inputs=None, wait=True, logs="All", job_name=None, experiment_config=None):
-        if self.huggingface_token and wait == True:
+        if self.huggingface_token and wait is True:
             logger.info(f"creating repository {self.base_job_name} on the HF hub")
             self.repo_url = HfApi().create_repo(token=self.huggingface_token, name=self.base_job_name)
 
         # parent fit method
         super(HuggingFace, self).fit(inputs, wait, logs, job_name, experiment_config)
 
-        if self.huggingface_token and wait == True:
+        if self.huggingface_token and wait is True:
             logger.info(f"downloading model to {self.latest_training_job.name}/ ")
             self.download_model(".", True)
 
@@ -149,7 +145,7 @@ class HuggingFace(Framework):
     def plot_result(self, metrics="all"):
         return plot_results(self, metrics)
 
-    def _get_container_image(self, container_type):
+    def _get_container_image(self, container_type: str) -> str:
         """return container image ecr url"""
         device = get_container_device(self.instance_type)
         image_uri = self._ecr_template_string.format(

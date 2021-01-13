@@ -1,10 +1,3 @@
-import os
-import re
-import tarfile
-
-from sagemaker.s3 import S3Downloader
-
-
 def plot_results(estimator, metrics="all"):
     """plots tracked result metrics and returns dataframe of it. """
     df = estimator.training_job_analytics.dataframe()

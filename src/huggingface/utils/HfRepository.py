@@ -1,7 +1,5 @@
-import json
 import os
 import subprocess
-import sys
 from typing import Dict, List
 
 
@@ -79,7 +77,7 @@ class HfRepository:
         #       print(e.output.decode())
         try:
             subprocess.run(f"git clone {self.repo_url} {self.model_dir}".split(), check=True)
-        except:
+        except Exception:
             subprocess.run(f"git init .".split(), check=True, cwd=self.model_dir)
             subprocess.run(f"git remote add origin {self.repo_url}".split(), check=True, cwd=self.model_dir)
 
@@ -120,7 +118,7 @@ class HfRepository:
         #       print(e.output.decode())
         try:
             subprocess.run(f"git push".split(), check=True, cwd=self.model_dir)
-        except:
+        except Exception:
             subprocess.run(f"git push --set-upstream origin master".split(), check=True, cwd=self.model_dir)
 
     def commit_files_and_push_to_hub(self, commit_message="commit model from SageMaker"):
