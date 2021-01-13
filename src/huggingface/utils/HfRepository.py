@@ -1,8 +1,9 @@
-import sys
-import subprocess
 import json
 import os
+import subprocess
+import sys
 from typing import Dict, List
+
 
 MODEL_CARD_TEMPLATE = """
 ---
@@ -52,7 +53,7 @@ class HfRepository:
             "*.onnx",
         ] + large_file_tracking_list
 
-        self.config_git_username_and_email()
+        # self.config_git_username_and_email()
 
         self.install_lfs_in_repo()
 
@@ -126,4 +127,3 @@ class HfRepository:
         """combines commit_files and push_to_hub"""
         self.commit_files(commit_message)
         self.push_to_hub()
-

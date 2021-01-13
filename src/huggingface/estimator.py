@@ -1,5 +1,7 @@
 import logging
 import sys
+import os
+import tarfile
 
 logger = logging.getLogger("sagemaker")
 
@@ -9,22 +11,29 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
+
+from typing import Dict, List, Optional
+
+from sagemaker import Session
 from sagemaker.estimator import Framework
 from sagemaker.pytorch.model import PyTorchModel
 from sagemaker.s3 import S3Downloader
-
-from huggingface.utils import validate_version_or_image_args, get_container_device, plot_result, download_model
-from sagemaker import Session
-import tarfile
-import os
-from typing import Dict, List, Optional
-
 from transformers.hf_api import HfApi
-from huggingface.HfRepository import HfRepository
+
+from huggingface.utils import (
+    HfRepository,
+    download_model,
+    get_container_device,
+    plot_results,
+    validate_version_or_image_args,
+)
 
 
 class HuggingFace(Framework):
-    """Custom sagemaker-sdk estimator impelemntation of the HuggingFace libaries."""
+    """
+    Custom sagemaker-sdk estimator impelemntation of the HuggingFace libaries. This implementation is oriented towards the Pytorch implementation.
+    https://github.com/aws/sagemaker-python-sdk/blob/master/src/sagemaker/pytorch/estimator.py
+    """
 
     # FIXME: Sagemaker currently only supports images from private ecr not public ecr
     # _public_ecr_template_string = "public.ecr.aws/t6m7g5n4/huggingface-{type}:0.0.1-{device}-transformers{transformers_version}-datasets{datasets_version}"
@@ -35,7 +44,6 @@ class HuggingFace(Framework):
         entry_point="train.py",
         source_dir: str = None,
         hyperparameters: Optional[Dict[str, str]] = None,
-        py_version="py3",
         framework_version={"transformers": "4.1.1", "datasets": "1.1.3"},
         image_uri: Optional[str] = None,
         huggingface_token: str = None,
@@ -59,13 +67,10 @@ class HuggingFace(Framework):
                 SageMaker. For convenience, this accepts other types for keys
                 and values, but ``str()`` will be called to convert them before
                 training.
-            framework_version (str): PyTorch version you want to use for
-                executing your model training code. Defaults to ``None``. Required unless
+            framework_version (dict): Transformers and datasets versions you want to use for
+                executing your model training code. Defaults to ``{"transformers": "4.1.1", "datasets": "1.1.3"}``. Required unless
                 ``image_uri`` is provided. List of supported versions:
                 https://github.com/aws/sagemaker-python-sdk#pytorch-sagemaker-estimators.
-            py_version (str): Python version you want to use for executing your
-                model training code. One of 'py2' or 'py3'. Defaults to ``None``. Required
-                unless ``image_uri`` is provided.
             image_uri (str): If specified, the estimator will use this image
                 for training and hosting, instead of selecting the appropriate
                 SageMaker official image based on framework_version and
@@ -76,14 +81,14 @@ class HuggingFace(Framework):
                 If ``framework_version`` or ``py_version`` are ``None``, then
                 ``image_uri`` is required. If also ``None``, then a ``ValueError``
                 will be raised.
-            huggingface_token (str): HuggingFace Hub authentication token for uploading your model files. 
+            huggingface_token (str): HuggingFace Hub authentication token for uploading your model files.
                 You can get this by either using the [transformers-cli](https://huggingface.co/transformers/model_sharing.html) with `transfomers-cli login`
-                or using the `login()` method of `transformers.hf_api`. If the HuggingFace Token is provided the model will uploaded automatically to the 
-                model hub using the `base_job_name` as repository name. 
+                or using the `login()` method of `transformers.hf_api`. If the HuggingFace Token is provided the model will uploaded automatically to the
+                model hub using the `base_job_name` as repository name.
         """
         # validating framework_version and python version
         self.framework_version = framework_version
-        self.py_version = py_version
+        self.py_version = "py3"
         validate_version_or_image_args(self.framework_version, self.py_version)
 
         # checking for instance_type
@@ -108,8 +113,6 @@ class HuggingFace(Framework):
                 f"estimator initialized with HuggingFace Token, model will be uploaded to hub using the {self.base_job_name} as repostiory name"
             )
             self.huggingface_token = huggingface_token
-
-        # self.distribution = distribution or {}
 
     def download_model(self, local_path=".", unzip=False):
         os.makedirs(local_path, exist_ok=True)
@@ -144,11 +147,7 @@ class HuggingFace(Framework):
             model_repo.commit_files_and_push_to_hub()
 
     def plot_result(self, metrics="all"):
-        return plot_result(self, metrics)
-
-    # def hyperparameters(self):
-    # for distributed training
-    #   return
+        return plot_results(self, metrics)
 
     def _get_container_image(self, container_type):
         """return container image ecr url"""
@@ -174,30 +173,8 @@ class HuggingFace(Framework):
         image_name=None,
         **kwargs,
     ):
-        """returns Pytorch model from sagemaker-sdk since its none for HF implemented
+        """returns no model from sagemaker-sdk since its none for HF implemented
         https://sagemaker.readthedocs.io/en/stable/frameworks/pytorch/using_pytorch.html?highlight=requirements.txt#using-third-party-libraries
         there fore we has to include a `requirements.txt` to the code folder
         """
-        # TODO: Not implemented
-        return None
-        # if "image_uri" not in kwargs:
-        #     kwargs["image_uri"] = self._get_container_image("inference")
-
-        # kwargs["name"] = self._get_or_create_name(kwargs.get("name"))
-
-        # return PyTorchModel(
-        #     self.model_data,
-        #     role or self.role,
-        #     entry_point or self._model_entry_point(),
-        #     framework_version="1.6",
-        #     py_version=self.py_version,
-        #     source_dir=(source_dir or self._model_source_dir()),
-        #     container_log_level=self.container_log_level,
-        #     code_location=self.code_location,
-        #     model_server_workers=model_server_workers,
-        #     sagemaker_session=self.sagemaker_session,
-        #     vpc_config=self.get_vpc_config(vpc_config_override),
-        #     dependencies=(dependencies or self.dependencies),
-        #     **kwargs
-        # )
-
+        raise NotImplementedError

@@ -2,7 +2,8 @@
 from setuptools import find_packages
 from setuptools import setup
 
-REQUIRED_PKGS = [
+# Declare minimal set for installation
+required_packages = [
     "sagemaker",
     "sagemaker[local]",
     "sagemaker-experiments",
@@ -15,22 +16,26 @@ REQUIRED_PKGS = [
     "matplotlib",
 ]
 
-QUALITY_REQUIRE = [
+# Specific use case dependencies
+extras = {}
+
+# dependency for code quality
+extras["quality"] = [
     "black",
     "isort",
     "flake8==3.7.9",
 ]
 
-TESTS_REQUIRE = [
+# Meta dependency groups
+extras["all"] = [item for group in extras.values() for item in group]
+
+# Tests specific dependencies (do not need to be included in 'all')
+extras["test"] = [
+    extras["all"],
     "pytest",
     "pytest-xdist",
 ]
 
-EXTRAS_REQUIRE = {
-    "dev": TESTS_REQUIRE + QUALITY_REQUIRE,
-    "tests": TESTS_REQUIRE,
-    "quality": QUALITY_REQUIRE,
-}
 
 setup(
     name="sagemaker-sdk-huggingface",
@@ -43,8 +48,8 @@ setup(
     url="https://github.com/philschmid/sagemaker-sdk-huggingface/tree/SagemakerTrainer",
     package_dir={"": "src"},
     packages=find_packages("src"),
-    install_requires=REQUIRED_PKGS,
-    extras_require=EXTRAS_REQUIRE,
+    install_requires=required_packages,
+    extras_require=extras,
     license="Apache 2.0",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
