@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# huggingface versions
-transformers_version=4.1.1
-datasets_version=1.1.3
+# huggingface versions defaults to latest
+transformers_version=$(curl --silent --location https://pypi.org/pypi/transformers/json | python -c "import sys, json, pkg_resources; releases = json.load(sys.stdin)['releases']; print(sorted(releases, key=pkg_resources.parse_version)[-1].strip())")
+datasets_version=$(curl --silent --location https://pypi.org/pypi/datasets/json | python -c "import sys, json, pkg_resources; releases = json.load(sys.stdin)['releases']; print(sorted(releases, key=pkg_resources.parse_version)[-1].strip())")
+
+
 
 # image variables
 image_type=training
@@ -15,8 +17,8 @@ cpu_tag=$version-cpu-transformers$transformers_version-datasets$datasets_version
 gpu_tag=$version-gpu-transformers$transformers_version-datasets$datasets_version-cu110
 
 # aws parameters
-aws_account_id=558105141721
-aws_profile=default
+aws_profile=hf-sm
+aws_account_id=$(aws sts get-caller-identity --profile $aws_profile | python -c "import sys, json; aws_account = json.load(sys.stdin)['Account']; print(aws_account)")
 aws_region=eu-central-1
 
 #registry parameters
@@ -115,3 +117,9 @@ echo "pushing build docker image"
 docker push $ecr_url/$container_name:$tag
 
 
+
+    aws ecr get-login-password \
+        --region eu-central-1 \
+    | docker login \
+        --username AWS \
+        --password-stdin 558105141721.dkr.ecr.eu-central-1.amazonaws.com
