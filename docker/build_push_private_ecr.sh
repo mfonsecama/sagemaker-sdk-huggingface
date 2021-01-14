@@ -115,11 +115,3 @@ fi
 # push docker to registry
 echo "pushing build docker image"
 docker push $ecr_url/$container_name:$tag
-
-
-
-    aws ecr get-login-password \
-        --region eu-central-1 \
-    | docker login \
-        --username AWS \
-        --password-stdin 558105141721.dkr.ecr.eu-central-1.amazonaws.com
