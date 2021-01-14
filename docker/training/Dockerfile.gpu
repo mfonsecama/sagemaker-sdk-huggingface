@@ -76,6 +76,9 @@ RUN apt-get update \
 #    cuda-nvrtc-dev-10-1 \
  && rm -rf /var/lib/apt/lists/*
 
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt-get install git-lfs
+
+
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/libcublas-11-0_${CUBLAS_VERSION}.deb \
  && dpkg -i libcublas-11-0_${CUBLAS_VERSION}.deb \
  && apt-get install -f -y \

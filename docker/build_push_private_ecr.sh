@@ -28,7 +28,6 @@ ecr_url=$aws_account_id.dkr.ecr.$aws_region.amazonaws.com
 while (( $# > 1 )); do case $1 in
    --device) device="$2";;
    --image_type) image_type="$2";;
-   --account_id) aws_account_id="$2";;
    --profile) aws_profile="$2";;
    --transformers_version) transformers_version="$2";;
    --datasets_version) datasets_version="$2";;

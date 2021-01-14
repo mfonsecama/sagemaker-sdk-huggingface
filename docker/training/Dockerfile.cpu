@@ -33,6 +33,7 @@ ENV DGLBACKEND=pytorch
 ARG PT_TRAINING_URL=https://aws-pytorch-binaries.s3-us-west-2.amazonaws.com/r1.6.0_aws/20200727-215603/a40b1c195ba679596118514fcbeae1f422591426/cpu/torch-1.6.0-cp36-cp36m-manylinux1_x86_64.whl
 WORKDIR /
 
+
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -40,7 +41,6 @@ RUN apt-get update \
     curl \
     emacs \
     git \
-    git-lfs \
     wget \
     vim \
     build-essential \
@@ -53,6 +53,8 @@ RUN apt-get update \
     zlib1g-dev \
     software-properties-common \
  && rm -rf /var/lib/apt/lists/*
+
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt-get install git-lfs
 
 RUN wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-$OPEN_MPI_VERSION.tar.gz \
  && gunzip -c openmpi-$OPEN_MPI_VERSION.tar.gz | tar xf - \
