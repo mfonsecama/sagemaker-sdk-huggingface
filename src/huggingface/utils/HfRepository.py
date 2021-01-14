@@ -32,14 +32,21 @@ class HfRepository:
         repo_url: str,
         huggingface_token: str,
         model_dir: str,
+    ):
+        self.repo_url = self.add_token_to_repository_url(repo_url, huggingface_token)
+
+        self.model_dir = model_dir
+
+    def init_new_repository(
+        self,
         large_file_tracking_list=[],
         user="sagemaker",
         email="sagemaker@huggingface.co",
     ):
-        self.repo_url = self.add_token_to_repository_url(repo_url, huggingface_token)
+        """Initializes a new hf hub repository"""
+
         self.email = email
         self.user = user
-        self.model_dir = model_dir
         self.large_file_tracking_list = [
             "*.bin.*",
             "*.lfs.*",
@@ -51,13 +58,13 @@ class HfRepository:
             "*.onnx",
         ] + large_file_tracking_list
 
-        # self.config_git_username_and_email()
-
         self.install_lfs_in_repo()
 
         self.clone_remote_repository_to_local_dir()
 
         self.add_tracking_for_large_files()
+
+        # self.config_git_username_and_email()
 
     def install_lfs_in_repo(self):
         """installs git lfs for current shell user"""
@@ -80,6 +87,7 @@ class HfRepository:
         except Exception:
             subprocess.run(f"git init .".split(), check=True, cwd=self.model_dir)
             subprocess.run(f"git remote add origin {self.repo_url}".split(), check=True, cwd=self.model_dir)
+            subprocess.run(f"git checkout -b main".split(), check=True, cwd=self.model_dir)
 
     def add_token_to_repository_url(self, repo_url: str, huggingface_token: str) -> str:
         """replaces default repository url and adds huggingface token to so git push is possible"""
@@ -119,7 +127,10 @@ class HfRepository:
         try:
             subprocess.run(f"git push".split(), check=True, cwd=self.model_dir)
         except Exception:
-            subprocess.run(f"git push --set-upstream origin master".split(), check=True, cwd=self.model_dir)
+            subprocess.run(f"git fetch".split(), check=True, cwd=self.model_dir)
+            subprocess.run(f"git branch --set-upstream-to=origin/main main".split(), check=True, cwd=self.model_dir)
+            subprocess.run(f"git pull --allow-unrelated-histories".split(), check=True, cwd=self.model_dir)
+            subprocess.run(f"git push".split(), check=True, cwd=self.model_dir)
 
     def commit_files_and_push_to_hub(self, commit_message="commit model from SageMaker"):
         """combines commit_files and push_to_hub"""

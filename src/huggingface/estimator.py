@@ -31,8 +31,6 @@ class HuggingFace(Framework):
     https://github.com/aws/sagemaker-python-sdk/blob/master/src/sagemaker/pytorch/estimator.py
     """
 
-    # FIXME: Sagemaker currently only supports images from private ecr not public ecr
-    # _public_ecr_template_string = "public.ecr.aws/t6m7g5n4/huggingface-{type}:0.0.1-{device}-transformers{transformers_version}-datasets{datasets_version}"
     _ecr_template_string = "558105141721.dkr.ecr.eu-central-1.amazonaws.com/huggingface-{type}:0.0.1-{device}-transformers{transformers_version}-datasets{datasets_version}"
 
     def __init__(
@@ -138,6 +136,7 @@ class HuggingFace(Framework):
                 huggingface_token=self.huggingface_token,
                 model_dir=f"./{self.latest_training_job.name}",
             )
+            model_repo.init_new_repository()
 
             logger.info("uploading model files to HF hub")
             model_repo.commit_files_and_push_to_hub()
