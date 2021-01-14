@@ -106,7 +106,7 @@ class HuggingFace(Framework):
             logger.info(
                 f"estimator initialized with HuggingFace Token, model will be uploaded to hub using the {self.base_job_name} as repostiory name"
             )
-            self.huggingface_token = huggingface_token
+        self.huggingface_token = huggingface_token
 
     def download_model(self, local_path=".", unzip=False):
         os.makedirs(local_path, exist_ok=True)
