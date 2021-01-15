@@ -52,7 +52,6 @@ RUN apt-get update \
     curl \
     emacs \
     git \
-    git-lfs \
     jq \
     libglib2.0-0 \
     libgl1-mesa-glx \
@@ -79,6 +78,7 @@ RUN apt-get update \
 RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && apt-get install git-lfs
 
 
+
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/libcublas-11-0_${CUBLAS_VERSION}.deb \
  && dpkg -i libcublas-11-0_${CUBLAS_VERSION}.deb \
  && apt-get install -f -y \
@@ -92,6 +92,7 @@ RUN wget https://www.open-mpi.org/software/ompi/v4.0/downloads/openmpi-$OPEN_MPI
  && cd .. \
  && rm openmpi-$OPEN_MPI_VERSION.tar.gz \
  && rm -rf openmpi-$OPEN_MPI_VERSION
+
 
 ENV PATH="$PATH:/home/.openmpi/bin"
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/.openmpi/lib/"
