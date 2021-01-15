@@ -38,7 +38,7 @@ class HuggingFace(Framework):
         entry_point="train.py",
         source_dir: str = None,
         hyperparameters: Optional[Dict[str, str]] = None,
-        framework_version={"transformers": "4.1.1", "datasets": "1.1.3"},
+        framework_version={"transformers": "4.2.1", "datasets": "1.2.1"},
         image_uri: Optional[str] = None,
         huggingface_token: str = None,
         # distribution=None,
