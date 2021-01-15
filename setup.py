@@ -38,7 +38,7 @@ extras["test"] = [
 
 
 setup(
-    name="sagemaker-sdk-huggingface",
+    name="sagemaker_huggingface",
     version="0.0.1",
     description="Custom Sdk implementation for the huggingface libraries",
     long_description=open("readme.md", "r", encoding="utf-8").read(),
