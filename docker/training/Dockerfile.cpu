@@ -9,8 +9,8 @@ ARG OPEN_MPI_VERSION=4.0.1
 
 ########### Custom ###########
 # Add Arguments for huggingface libary versions
-ARG TRANSFORMERS_VERSION=4.1.1
-ARG DATASETS_VERSION=1.1.3
+ARG TRANSFORMERS_VERSION
+ARG DATASETS_VERSION
 
 
 # The smdebug pipeline relies for following format to perform string replace and trigger DLC pipeline for validating

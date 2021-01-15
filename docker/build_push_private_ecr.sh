@@ -75,7 +75,7 @@ elif [[ $device = "cpu" ]]; then
 elif [[ $device = "test" ]]; then
     echo "Building test container...."
     dockerfile=Dockerfile.test
-    docker build --tag $ecr_url/$ecr_alias/$container_name:test \
+    docker build --tag $ecr_url/$ecr_alias/$container_name \
                 --file ./$image_type/$dockerfile \
                 --build-arg TRANSFORMERS_VERSION=$transformers_version \
                 --build-arg  DATASETS_VERSION=$datasets_version \
