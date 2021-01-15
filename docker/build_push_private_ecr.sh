@@ -95,7 +95,7 @@ docker build --tag $ecr_url/$container_name:$tag \
                 ./$image_type 
 
 # login into public ecr registry
-echo "login into ecr-public registry using ${aws_profile} profile"
+echo "login into ecr registry using ${aws_profile} profile"
 if [[ $aws_profile = 'ci' ]]; then
     aws ecr get-login-password \
         --region $aws_region \
